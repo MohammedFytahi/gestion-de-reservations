@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centre de Fitness - Réservations</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Centre de Fitness - Réservations</h1>
+    </header>
+    <main>
+
+        <section id="admin">
+            <h2>Ajouter une Nouvelle Activité</h2>
+            <form id="add-activity-form">
+                <label for="activity-name">Nom de l'activité:</label>
+                <input type="text" id="activity-name" name="name">
+                <label for="activity-type">Type:</label>
+                <input type="text" id="activity-type" name="type">
+                <label for="activity-description">Description:</label>
+                <input type="text" id="activity-description" name="description">
+                <button type="submit">Ajouter l'Activité</button>
+            </form>
+        </section>
+        
+        <section id="filter">
+            <h2>Filtrer par Type</h2>
+            <select id="type-filter">
+                <option value="">Tous</option>
+                <option value="Relaxation">Relaxation</option>
+                <option value="Sport">Sport</option>
+                <option value="Art">Art</option>
+            </select>
+        </section>
+        
+        <section id="réservation">
+            <h2>Activités Disponibles</h2>
+            <ul id="activités-disponibles">
+                <!-- Les activités disponibles seront listées ici -->
+            </ul>
+        </section>
+        <section id="favoris">
+            <h2>Mes Favoris</h2>
+            <ul id="liste-favoris">
+                <!-- Les favoris seront listés ici -->
+            </ul>
+        </section>
+        <section id="panier">
+            <h2>Mon Panier</h2>
+            <ul id="liste-panier">
+                <!-- Le panier sera listé ici -->
+            </ul>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Centre de Fitness</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>

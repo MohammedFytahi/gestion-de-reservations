@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1,
+        "name": "Yoga",
+        "type": "Relaxation",
+        "description": "Session de yoga pour se détendre."
+    },
+    {
+        "id": 2,
+        "name": "Boxing",
+        "type": "Sport",
+        "description": "Session de boxe pour se défouler."
+    },
+    {
+        "id": 3,
+        "name": "Painting",
+        "type": "Art",
+        "description": "Atelier de peinture pour exprimer votre créativité."
+    }
+]
