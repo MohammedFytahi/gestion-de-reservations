@@ -1,147 +1,166 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const availableActivities = document.getElementById('activités-disponibles');
+document.addEventListener('DOMContentLoaded', () => {
+    const activitiesList = document.getElementById('activités-disponibles');
     const favoritesList = document.getElementById('liste-favoris');
     const cartList = document.getElementById('liste-panier');
-    const addActivityForm = document.getElementById('add-activity-form');
-    const typeFilter = document.getElementById('type-filter');
+    const finalizeButton = document.getElementById('finaliser-reservation');
+    const ajoutActiviteForm = document.getElementById('ajout-activite-form');
 
-    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    function afficherActivités() {
+        fetch('php/consulter_activites.php')
+            .then(response => response.json())
+            .then(data => {
+                activitiesList.innerHTML = '';
+                data.forEach(activity => {
+                    const li = document.createElement('li');
+                    li.textContent = `${activity.nom} (${activity.type}) - ${activity.description}`;
+                    const addButton = document.createElement('button');
+                    addButton.textContent = 'Ajouter au Panier';
+                    addButton.addEventListener('click', () => {
+                        ajouterAuPanier(activity.id);
+                    });
+                    li.appendChild(addButton);
 
-    // Fonction pour afficher les activités par type
-    function renderActivities(activities) {
-        availableActivities.innerHTML = '';
-        activities.forEach(activity => {
-            if (!typeFilter.value || activity.type === typeFilter.value) {
-                let li = createActivityListItem(activity);
-                availableActivities.appendChild(li);
-            }
-        });
+                    const favoriteButton = document.createElement('button');
+                    favoriteButton.textContent = 'Ajouter aux Favoris';
+                    favoriteButton.addEventListener('click', () => {
+                        ajouterAuxFavoris(activity.id);
+                    });
+                    li.appendChild(favoriteButton);
+                    
+                    activitiesList.appendChild(li);
+                });
+            })
+            .catch(error => console.error('Erreur:', error));
     }
 
-    // Créer un élément de liste pour une activité
-    function createActivityListItem(activity) {
-        let li = document.createElement('li');
-        li.textContent = `${activity.name} - ${activity.type}`;
-        
-        // Bouton pour ajouter aux favoris
-        let favButton = document.createElement('button');
-        favButton.textContent = 'Ajouter aux Favoris';
-        favButton.addEventListener('click', () => addToFavorites(activity));
-        
-        // Boutons pour gérer le panier
-        let addButton = document.createElement('button');
-        addButton.textContent = 'Ajouter au Panier';
-        addButton.addEventListener('click', () => addToCart(activity));
-        
-        let removeButton = document.createElement('button');
-        removeButton.textContent = 'Retirer du Panier';
-        removeButton.addEventListener('click', () => removeFromCart(activity));
-
-        li.appendChild(favButton);
-        li.appendChild(addButton);
-        li.appendChild(removeButton);
-        return li;
-    }
-
-    // Fonction pour ajouter aux favoris
-    function addToFavorites(activity) {
-        if (!favorites.some(fav => fav.id === activity.id)) {
-            favorites.push(activity);
-            localStorage.setItem('favorites', JSON.stringify(favorites));
-            renderFavorites();
-        }
-    }
-
-    // Fonction pour retirer des favoris
-    function removeFromFavorites(activity) {
-        favorites = favorites.filter(fav => fav.id !== activity.id);
-        localStorage.setItem('favorites', JSON.stringify(favorites));
-        renderFavorites();
-    }
-
-    // Fonction pour ajouter au panier
-    function addToCart(activity) {
-        if (!cart.some(item => item.id === activity.id)) {
-            cart.push(activity);
-            localStorage.setItem('cart', JSON.stringify(cart));
-            renderCart();
-        }
-    }
-
-    // Fonction pour retirer du panier
-    function removeFromCart(activity) {
-        cart = cart.filter(item => item.id !== activity.id);
-        localStorage.setItem('cart', JSON.stringify(cart));
-        renderCart();
-    }
-
-    // Fonction pour afficher les favoris
-    function renderFavorites() {
+    function afficherFavoris() {
+        const favoris = JSON.parse(localStorage.getItem('favoris')) || [];
         favoritesList.innerHTML = '';
-        favorites.forEach(activity => {
-            let li = createActivityListItem(activity);
-            let removeButton = document.createElement('button');
+        favoris.forEach(activityId => {
+            const li = document.createElement('li');
+            li.textContent = `Activité ID: ${activityId}`;
+            const removeButton = document.createElement('button');
             removeButton.textContent = 'Retirer des Favoris';
-            removeButton.addEventListener('click', () => removeFromFavorites(activity));
+            removeButton.addEventListener('click', () => {
+                retirerDesFavoris(activityId);
+            });
             li.appendChild(removeButton);
             favoritesList.appendChild(li);
         });
     }
 
-    // Fonction pour afficher le panier
-    function renderCart() {
+    function afficherPanier() {
+        const panier = JSON.parse(localStorage.getItem('panier')) || [];
         cartList.innerHTML = '';
-        cart.forEach(activity => {
-            let li = createActivityListItem(activity);
-            let removeButton = document.createElement('button');
+        panier.forEach(activityId => {
+            const li = document.createElement('li');
+            li.textContent = `Activité ID: ${activityId}`;
+            const removeButton = document.createElement('button');
             removeButton.textContent = 'Retirer du Panier';
-            removeButton.addEventListener('click', () => removeFromCart(activity));
+            removeButton.addEventListener('click', () => {
+                retirerDuPanier(activityId);
+            });
             li.appendChild(removeButton);
             cartList.appendChild(li);
         });
     }
 
-    // Écouteur d'événement pour le formulaire d'ajout d'activité
-    addActivityForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        let activityName = this.elements['name'].value;
-        let activityType = this.elements['type'].value;
-        let activityDescription = this.elements['description'].value;
-        let newActivity = { id: generateUniqueId(), name: activityName, type: activityType, description: activityDescription };
-        
-        // Envoi de la nouvelle activité à l'API (à implémenter)
-        fetch('php/api.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newActivity)
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log(data.message); // Afficher un message de confirmation
-            // Réactualiser la liste des activités après l'ajout
-            fetchActivities();
-        })
-        .catch(error => console.error('Erreur lors de l\'ajout d\'activité:', error));
-
-        // Réinitialiser le formulaire
-        this.reset();
-    });
-
-    // Fonction pour récupérer les activités depuis l'API
-    function fetchActivities() {
-        fetch('php/api.php')
-        .then(response => response.json())
-        .then(data => {
-            renderActivities(data);
-        })
-        .catch(error => console.error('Erreur lors de la récupération des activités:', error));
+    function ajouterAuxFavoris(activityId) {
+        let favoris = JSON.parse(localStorage.getItem('favoris')) || [];
+        if (!favoris.includes(activityId)) {
+            favoris.push(activityId);
+            localStorage.setItem('favoris', JSON.stringify(favoris));
+            afficherFavoris();
+        }
     }
 
-    // Initialisation : charger les activités et afficher les favoris et le panier
-    fetchActivities();
-    renderFavorites();
-    renderCart();
+    function retirerDesFavoris(activityId) {
+        let favoris = JSON.parse(localStorage.getItem('favoris')) || [];
+        favoris = favoris.filter(id => id !== activityId);
+        localStorage.setItem('favoris', JSON.stringify(favoris));
+        afficherFavoris();
+    }
+
+    function ajouterAuPanier(activityId) {
+        let panier = JSON.parse(localStorage.getItem('panier')) || [];
+        if (!panier.includes(activityId)) {
+            panier.push(activityId);
+            localStorage.setItem('panier', JSON.stringify(panier));
+            afficherPanier();
+        }
+    }
+
+    function retirerDuPanier(activityId) {
+        let panier = JSON.parse(localStorage.getItem('panier')) || [];
+        panier = panier.filter(id => id !== activityId);
+        localStorage.setItem('panier', JSON.stringify(panier));
+        afficherPanier();
+    }
+
+    function finaliserReservation() {
+        const panier = JSON.parse(localStorage.getItem('panier')) || [];
+        if (panier.length === 0) {
+            alert('Votre panier est vide.');
+            return;
+        }
+
+        fetch('reserver_activites.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ activities: panier })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Réservation réussie!');
+                    localStorage.removeItem('panier');
+                    afficherPanier();
+                } else {
+                    alert('Erreur lors de la réservation.');
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
+    }
+
+    ajoutActiviteForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        
+        const nom = document.getElementById('nom').value;
+        const description = document.getElementById('description').value;
+        const type = document.getElementById('type').value;
+        const placesDisponibles = document.getElementById('placesDisponibles').value;
+        
+        fetch('php/ajouter_activite.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                nom: nom,
+                description: description,
+                type: type,
+                placesDisponibles: placesDisponibles
+            })
+        })
+        
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Activité ajoutée avec succès!');
+                afficherActivités();
+            } else {
+                alert('Erreur lors de l\'ajout de l\'activité.');
+            }
+        })
+        .catch(error => console.error('Erreur:', error));
+    });
+
+    finalizeButton.addEventListener('click', finaliserReservation);
+
+    // Afficher les activités, favoris et panier au chargement de la page
+    afficherActivités();
+    afficherFavoris();
+    afficherPanier();
 });
