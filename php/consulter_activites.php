@@ -1,9 +1,14 @@
 <?php
 require 'config.php';
 
-$stmt = $db->query('SELECT * FROM activites');
-$activites = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+// Set the content type to application/json
 header('Content-Type: application/json');
-echo json_encode($activites);
+
+// Fetch activities from the database
+$stmt = $db->prepare('SELECT * FROM activites');
+$stmt->execute();
+$activities = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Return activities as JSON
+echo json_encode($activities);
 ?>

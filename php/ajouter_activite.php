@@ -1,34 +1,32 @@
 <?php
-require 'config.php';
-require 'admin.php';
+session_start();
+header('Content-Type: application/json');
 
-// Lire les données JSON du corps de la requête
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405); // Méthode non autorisée
+    echo json_encode(['success' => false, 'message' => 'Méthode non autorisée.']);
+    exit;
+}
+
+require 'config.php';
+
 $data = json_decode(file_get_contents('php://input'), true);
 
-// Vérifier si toutes les données nécessaires sont présentes
+if (json_last_error() !== JSON_ERROR_NONE) {
+    echo json_encode(['success' => false, 'message' => 'Invalid JSON input']);
+    exit;
+}
+
 if (isset($data['nom'], $data['description'], $data['type'], $data['placesDisponibles'])) {
     $nom = $data['nom'];
     $description = $data['description'];
     $type = $data['type'];
     $placesDisponibles = $data['placesDisponibles'];
 
-    // Vérifier l'authentification de l'administrateur
-    session_start();
-    if (isset($_SESSION['admin_id'])) {
-        $admin_id = $_SESSION['admin_id'];
+    if (isset($_SESSION['user_id']) && isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin') {
+        $stmt = $db->prepare('INSERT INTO activites (nom, description, type, placesDisponibles) VALUES (?, ?, ?, ?)');
+        $success = $stmt->execute([$nom, $description, $type, $placesDisponibles]);
 
-        // Récupérer l'administrateur à partir de la base de données
-        $stmt = $db->prepare('SELECT * FROM utilisateurs WHERE id = ?');
-        $stmt->execute([$admin_id]);
-        $adminData = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        // Créer l'objet Admin avec les données récupérées
-        $admin = new Admin($adminData['id'], $adminData['nom'], $adminData['email'], $adminData['motDePasse']);
-
-        // Ajouter l'activité en utilisant la méthode de l'objet Admin
-        $success = $admin->ajouterActivite($db, $nom, $description, $type, $placesDisponibles);
-
-        // Vérifier si l'ajout a réussi et renvoyer une réponse JSON
         if ($success) {
             echo json_encode(['success' => true]);
         } else {

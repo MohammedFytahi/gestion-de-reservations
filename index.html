@@ -1,55 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Centre de Fitness - Réservations</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centre de Fitness - Réservations</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-<h1>Centre de Fitness - Réservations</h1>
-</header>
-<main>
-<section id="réservation">
-<h2>Activités Disponibles</h2>
-<ul id="activités-disponibles">
-<!-- Les activités disponibles seront listées ici -->
-</ul>
-</section>
-<section id="favoris">
-<h2>Mes Favoris</h2>
-<ul id="liste-favoris">
-<!-- Les favoris seront listés ici -->
-</ul>
-</section>
-<section id="panier">
-<h2>Mon Panier</h2>
-<ul id="liste-panier">
-<!-- Le panier sera listé ici -->
-</ul>
-<button id="finaliser-reservation">Finaliser Réservation</button>
-</section>
+    <header>
+        <h1>Centre de Fitness - Réservations</h1>
+    </header>
+    <main>
+        <section id="réservation">
+            <h2>Activités Disponibles</h2>
+            <ul id="activités-disponibles">
+                <!-- Les activités disponibles seront listées ici -->
+            </ul>
+        </section>
+        <section id="favoris">
+            <h2>Mes Favoris</h2>
+            <ul id="liste-favoris">
+                <!-- Les favoris seront listés ici -->
+            </ul>
+        </section>
+        <section id="panier">
+            <h2>Mon Panier</h2>
+            <ul id="liste-panier">
+                <!-- Le panier sera listé ici -->
+            </ul>
+            <button id="finaliser-reservation">Finaliser Réservation</button>
+        </section>
 
-<section id="admin">
-<h2>Ajouter une Nouvelle Activité</h2>
-<form id="ajout-activite-form">
-    <label for="nom">Nom:</label>
-    <input type="text" id="nom" name="nom" required><br>
-    <label for="description">Description:</label>
-    <textarea id="description" name="description" required></textarea><br>
-    <label for="type">Type:</label>
-    <input type="text" id="type" name="type" required><br>
-    <label for="placesDisponibles">Places Disponibles:</label>
-    <input type="number" id="placesDisponibles" name="placesDisponibles" required><br>
-    <button type="submit">Ajouter Activité</button>
-</form>
-</section>
-
-</main>
-<footer>
-<p>&copy; 2024 Centre de Fitness</p>
-</footer>
-<script src="script.js"></script>
+        <section id="admin" style="display:none;">
+            <h2>Ajouter une Nouvelle Activité</h2>
+            <form id="ajout-activite-form">
+                <label for="nom">Nom:</label>
+                <input type="text" id="nom" name="nom" required>
+                <br>
+                <label for="description">Description:</label>
+                <input type="text" id="description" name="description" required>
+                <br>
+                <label for="type">Type:</label>
+                <input type="text" id="type" name="type" required>
+                <br>
+                <label for="placesDisponibles">Places Disponibles:</label>
+                <input type="number" id="placesDisponibles" name="placesDisponibles" required>
+                <br>
+                <button type="submit">Ajouter Activité</button>
+            </form>
+        </section>
+    </main>
+    <script src="script.js"></script>
 </body>
 </html>
