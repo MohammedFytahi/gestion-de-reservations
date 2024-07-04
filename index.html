@@ -9,6 +9,7 @@
 <body>
     <header>
         <h1>Centre de Fitness - Réservations</h1>
+        <button id="logout-button">Déconnexion</button> <!-- Logout button -->
     </header>
     <main>
         <section id="réservation">
@@ -65,5 +66,25 @@
         </section>
     </main>
     <script src="script.js"></script>
+    <script>
+        document.getElementById('logout-button').addEventListener('click', function() {
+            fetch('php/logout.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        localStorage.removeItem('user_id'); // Remove user_id from localStorage
+                        localStorage.removeItem('user_role'); // Remove user_role from localStorage
+                        alert('Déconnexion réussie!');
+                        window.location.href = 'login.html'; // Redirect to login page
+                    } else {
+                        alert('Erreur lors de la déconnexion.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur lors de la déconnexion.');
+                });
+        });
+    </script>
 </body>
 </html>

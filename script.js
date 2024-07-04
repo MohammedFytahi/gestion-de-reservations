@@ -156,27 +156,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     reservationsList.innerHTML = '';
                     data.forEach(reservation => {
                         const li = document.createElement('li');
-                        li.textContent = `Utilisateur ID: ${reservation.utilisateur_id} - Activité: ${reservation.nom} (${reservation.type}) - ${reservation.description}`;
+                        li.textContent = `Utilisateur: ${reservation.nom_utilisateur} - Activité: ${reservation.nom_activite} (${reservation.type}) - ${reservation.description}`;
                         reservationsList.appendChild(li);
                     });
                 }
             })
             .catch(error => console.error('Erreur:', error));
     }
+    
 
     function afficherReservationsUtilisateur() {
         fetch(`php/consulter_reservations_utilisateur.php?utilisateur_id=${userId}`)
         .then(response => response.json())
         .then(data => {
-            console.log('Réponse du serveur:', data);
-    
             if (!Array.isArray(data)) {
-                console.error('La réponse n\'est pas un tableau:', data);
-                // Gérer ici le cas où la réponse n'est pas un tableau valide
+                console.error('La réponse n\'est pas un tableau valide:', data);
+                alert('Erreur lors de la récupération des réservations utilisateur.');
                 return;
             }
-    
-            // Traitement normal ici pour afficher les réservations
+
             userReservationsList.innerHTML = '';
             if (data.length === 0) {
                 userReservationsList.innerHTML = '<li>Aucune réservation trouvée.</li>';
@@ -195,10 +193,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
         .catch(error => {
-            console.error('Erreur lors de la récupération des réservations:', error);
-            userReservationsList.innerHTML = '<li>Erreur lors de la récupération des réservations.</li>';
+            console.error('Erreur lors de la récupération des réservations utilisateur:', error);
+            userReservationsList.innerHTML = '<li>Erreur lors de la récupération des réservations utilisateur.</li>';
         });
-    
     }
 
     function annulerReservation(activiteId) {
