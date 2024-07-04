@@ -5,11 +5,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const finalizeButton = document.getElementById('finaliser-reservation');
     const ajoutActiviteForm = document.getElementById('ajout-activite-form');
     const adminSection = document.getElementById('admin');
+    const reservationsSection = document.getElementById('reservations');
+    const reservationsList = document.getElementById('liste-reservations');
     const userRole = localStorage.getItem('user_role');
     const userId = localStorage.getItem('user_id');
 
     if (userRole === 'admin') {
         adminSection.style.display = 'block';
+        reservationsSection.style.display = 'block';
+        afficherReservations();
+    } else {
+        adminSection.style.display = 'none';
+        reservationsSection.style.display = 'none';
     }
 
     function afficherActivités() {
@@ -20,8 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 data.forEach(activity => {
                     const li = document.createElement('li');
                     li.textContent = `${activity.nom} (${activity.type}) - ${activity.description}`;
-                    
-                    // Ajouter des boutons uniquement si le rôle est 'user'
+
                     if (userRole === 'user') {
                         const addButton = document.createElement('button');
                         addButton.textContent = 'Ajouter au Panier';
@@ -37,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                         li.appendChild(favoriteButton);
                     }
-                    
+
                     activitiesList.appendChild(li);
                 });
             })
@@ -122,35 +128,50 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             body: JSON.stringify({ activities: panier })
         })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => { throw new Error(text) });
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                alert('Réservation réussie!');
-                localStorage.removeItem(`panier_${userId}`);
-                afficherPanier();
-            } else {
-                alert(`Erreur lors de la réservation: ${data.message}`);
-            }
-        })
-        .catch(error => {
-            console.error('Erreur:', error);
-            alert(`Erreur lors de la réservation: ${error.message}`);
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Réservation réussie!');
+                    localStorage.removeItem(`panier_${userId}`);
+                    afficherPanier();
+                } else {
+                    alert('Erreur lors de la réservation.');
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
+    }
+
+    function afficherReservations() {
+        console.log('Fetching reservations...');
+        fetch('php/consulter_reservations.php')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Réservations:', data); // Debug: afficher les données reçues
+                if (data.error) {
+                    console.error('Erreur:', data.error);
+                    alert('Erreur lors de la récupération des réservations.');
+                } else if (data.length === 0) {
+                    reservationsList.innerHTML = '<li>Aucune réservation trouvée.</li>';
+                } else {
+                    reservationsList.innerHTML = '';
+                    data.forEach(reservation => {
+                        const li = document.createElement('li');
+                        li.textContent = `Utilisateur ID: ${reservation.utilisateur_id} - Activité: ${reservation.nom} (${reservation.type}) - ${reservation.description}`;
+                        reservationsList.appendChild(li);
+                    });
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
     }
 
     ajoutActiviteForm.addEventListener('submit', (event) => {
         event.preventDefault();
-        
+
         const nom = document.getElementById('nom').value;
         const description = document.getElementById('description').value;
         const type = document.getElementById('type').value;
         const placesDisponibles = document.getElementById('placesDisponibles').value;
-        
+
         fetch('php/ajouter_activite.php', {
             method: 'POST',
             headers: {
@@ -182,3 +203,4 @@ document.addEventListener('DOMContentLoaded', () => {
     afficherFavoris();
     afficherPanier();
 });
+``
