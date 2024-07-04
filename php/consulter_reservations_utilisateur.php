@@ -6,7 +6,7 @@ header('Content-Type: application/json');
 $utilisateur_id = isset($_GET['utilisateur_id']) ? intval($_GET['utilisateur_id']) : 0;
 
 if ($utilisateur_id === 0) {
-    echo json_encode(['error' => 'Paramètre utilisateur_id manquant ou invalide']);
+    echo json_encode(['error' => 'Utilisateur ID manquant']);
     exit;
 }
 

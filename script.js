@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminSection = document.getElementById('admin');
     const reservationsSection = document.getElementById('reservations');
     const reservationsList = document.getElementById('liste-reservations');
+    const userReservationsList = document.getElementById('liste-reservations-utilisateur');
     const userRole = localStorage.getItem('user_role');
     const userId = localStorage.getItem('user_id');
 
@@ -126,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ activities: panier })
+            body: JSON.stringify({ activities: panier, utilisateur_id: userId })
         })
             .then(response => response.json())
             .then(data => {
@@ -134,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('Réservation réussie!');
                     localStorage.removeItem(`panier_${userId}`);
                     afficherPanier();
+                    afficherReservationsUtilisateur();
                 } else {
                     alert('Erreur lors de la réservation.');
                 }
@@ -142,11 +144,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function afficherReservations() {
-        console.log('Fetching reservations...');
         fetch('php/consulter_reservations.php')
             .then(response => response.json())
             .then(data => {
-                console.log('Réservations:', data); // Debug: afficher les données reçues
                 if (data.error) {
                     console.error('Erreur:', data.error);
                     alert('Erreur lors de la récupération des réservations.');
@@ -162,6 +162,63 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             })
             .catch(error => console.error('Erreur:', error));
+    }
+
+    function afficherReservationsUtilisateur() {
+        fetch(`php/consulter_reservations_utilisateur.php?utilisateur_id=${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('Réponse du serveur:', data);
+    
+            if (!Array.isArray(data)) {
+                console.error('La réponse n\'est pas un tableau:', data);
+                // Gérer ici le cas où la réponse n'est pas un tableau valide
+                return;
+            }
+    
+            // Traitement normal ici pour afficher les réservations
+            userReservationsList.innerHTML = '';
+            if (data.length === 0) {
+                userReservationsList.innerHTML = '<li>Aucune réservation trouvée.</li>';
+            } else {
+                data.forEach(reservation => {
+                    const li = document.createElement('li');
+                    li.textContent = `${reservation.nom} (${reservation.type}) - ${reservation.description}`;
+                    const cancelButton = document.createElement('button');
+                    cancelButton.textContent = 'Annuler la Réservation';
+                    cancelButton.addEventListener('click', () => {
+                        annulerReservation(reservation.activite_id);
+                    });
+                    li.appendChild(cancelButton);
+                    userReservationsList.appendChild(li);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Erreur lors de la récupération des réservations:', error);
+            userReservationsList.innerHTML = '<li>Erreur lors de la récupération des réservations.</li>';
+        });
+    
+    }
+
+    function annulerReservation(activiteId) {
+        fetch('php/annuler_reservation.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ utilisateur_id: userId, activite_id: activiteId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Réservation annulée avec succès!');
+                afficherReservationsUtilisateur();
+            } else {
+                alert('Erreur lors de l\'annulation de la réservation.');
+            }
+        })
+        .catch(error => console.error('Erreur:', error));
     }
 
     ajoutActiviteForm.addEventListener('submit', (event) => {
@@ -198,9 +255,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     finalizeButton.addEventListener('click', finaliserReservation);
 
-    // Afficher les activités, favoris et panier au chargement de la page
     afficherActivités();
     afficherFavoris();
     afficherPanier();
+    afficherReservationsUtilisateur();
 });
-``

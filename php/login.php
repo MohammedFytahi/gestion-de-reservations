@@ -2,10 +2,6 @@
 session_start();
 header('Content-Type: application/json');
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 require 'config.php';
 
 $data = json_decode(file_get_contents('php://input'), true);
@@ -26,7 +22,7 @@ if (isset($data['username']) && isset($data['password'])) {
     if ($user && $password === $user['motDePasse']) {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_role'] = $user['role'];
-        echo json_encode(['success' => true, 'role' => $user['role']]);
+        echo json_encode(['success' => true, 'user_id' => $user['id'], 'role' => $user['role']]);
     } else {
         echo json_encode(['success' => false, 'message' => 'Invalid username or password']);
     }
