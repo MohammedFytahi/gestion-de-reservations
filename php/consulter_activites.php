@@ -1,14 +1,24 @@
 <?php
 require 'config.php';
 
-// Set the content type to application/json
+class ActiviteManager {
+    private $db;
+
+    public function __construct($db) {
+        $this->db = $db;
+    }
+
+    public function getActivites() {
+        $stmt = $this->db->prepare('SELECT * FROM activites');
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+
 header('Content-Type: application/json');
 
-// Fetch activities from the database
-$stmt = $db->prepare('SELECT * FROM activites');
-$stmt->execute();
-$activities = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$db = new Database('localhost', 'centre_loisirs', 'root', '');
+$activiteManager = new ActiviteManager($db->getConnection());
 
-// Return activities as JSON
-echo json_encode($activities);
+echo json_encode($activiteManager->getActivites());
 ?>

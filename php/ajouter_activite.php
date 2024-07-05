@@ -2,15 +2,30 @@
 session_start();
 header('Content-Type: application/json');
 
+require 'config.php';
+
+class ActiviteManager {
+    private $db;
+
+    public function __construct($db) {
+        $this->db = $db;
+    }
+
+    public function ajouterActivite($nom, $description, $type, $placesDisponibles) {
+        $stmt = $this->db->prepare('INSERT INTO activites (nom, description, type, placesDisponibles) VALUES (?, ?, ?, ?)');
+        $success = $stmt->execute([$nom, $description, $type, $placesDisponibles]);
+
+        return $success;
+    }
+}
+
+$data = json_decode(file_get_contents('php://input'), true);
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405); // Méthode non autorisée
     echo json_encode(['success' => false, 'message' => 'Méthode non autorisée.']);
     exit;
 }
-
-require 'config.php';
-
-$data = json_decode(file_get_contents('php://input'), true);
 
 if (json_last_error() !== JSON_ERROR_NONE) {
     echo json_encode(['success' => false, 'message' => 'Invalid JSON input']);
@@ -24,8 +39,10 @@ if (isset($data['nom'], $data['description'], $data['type'], $data['placesDispon
     $placesDisponibles = $data['placesDisponibles'];
 
     if (isset($_SESSION['user_id']) && isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin') {
-        $stmt = $db->prepare('INSERT INTO activites (nom, description, type, placesDisponibles) VALUES (?, ?, ?, ?)');
-        $success = $stmt->execute([$nom, $description, $type, $placesDisponibles]);
+        $db = new Database('localhost', 'centre_loisirs', 'root', '');
+        $activiteManager = new ActiviteManager($db->getConnection());
+
+        $success = $activiteManager->ajouterActivite($nom, $description, $type, $placesDisponibles);
 
         if ($success) {
             echo json_encode(['success' => true]);
