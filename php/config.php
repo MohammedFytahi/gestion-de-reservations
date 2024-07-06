@@ -1,20 +1,32 @@
 <?php
 class Database {
-    private $pdo;
+    private $host;
+    private $dbname;
+    private $username;
+    private $password;
+    private $conn;
 
     public function __construct($host, $dbname, $username, $password) {
-        try {
-            $dsn = "mysql:host=$host;dbname=$dbname;charset=utf8mb4";
-            $this->pdo = new PDO($dsn, $username, $password);
-            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch (PDOException $e) {
-            echo 'Connection failed: ' . $e->getMessage();
-            exit;
-        }
+        $this->host = $host;
+        $this->dbname = $dbname;
+        $this->username = $username;
+        $this->password = $password;
     }
 
     public function getConnection() {
-        return $this->pdo;
+        $this->conn = null;
+
+        try {
+            $this->conn = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->dbname, $this->username, $this->password);
+            $this->conn->exec("set names utf8");
+        } catch (PDOException $exception) {
+            echo "Connection error: " . $exception->getMessage();
+        }
+
+        return $this->conn;
     }
 }
+
+require 'admin.php';
+require 'ReservationManager.php';
 ?>

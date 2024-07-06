@@ -1,21 +1,5 @@
 <?php
 require 'config.php';
-
-class ReservationManager {
-    private $db;
-
-    public function __construct($db) {
-        $this->db = $db;
-    }
-
-    public function annulerReservation($utilisateur_id, $activite_id) {
-        $stmt = $this->db->prepare('DELETE FROM reservations WHERE utilisateur_id = ? AND activite_id = ?');
-        $stmt->execute([$utilisateur_id, $activite_id]);
-
-        return $stmt->rowCount() > 0;
-    }
-}
-
 header('Content-Type: application/json');
 
 $data = json_decode(file_get_contents('php://input'), true);
