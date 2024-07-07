@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const favoriteButton = document.createElement('button');
                         favoriteButton.textContent = 'Ajouter aux Favoris';
                         favoriteButton.addEventListener('click', () => {
-                            ajouterAuxFavoris(activity);
+                            ajouterAuxFavoris(activity.id); // Passer l'ID de l'activité
                         });
                         li.appendChild(favoriteButton);
                     }
@@ -52,19 +52,69 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function afficherFavoris() {
-        const favoris = JSON.parse(localStorage.getItem(`favoris_${userId}`)) || [];
-        favoritesList.innerHTML = '';
-        favoris.forEach(activity => {
-            const li = document.createElement('li');
-            li.textContent = `${activity.nom} (${activity.type}) - ${activity.description}`;
-            const removeButton = document.createElement('button');
-            removeButton.textContent = 'Retirer des Favoris';
-            removeButton.addEventListener('click', () => {
-                retirerDesFavoris(activity.nom);
-            });
-            li.appendChild(removeButton);
-            favoritesList.appendChild(li);
-        });
+        fetch('php/consulter_favoris.php')
+            .then(response => response.json())
+            .then(data => {
+                favoritesList.innerHTML = '';
+                data.forEach(activity => {
+                    const li = document.createElement('li');
+                    li.textContent = `${activity.nom} (${activity.type}) - ${activity.description}`;
+                    const removeButton = document.createElement('button');
+                    removeButton.textContent = 'Retirer des Favoris';
+                    removeButton.addEventListener('click', () => {
+                        retirerDesFavoris(activity.id); // Passer l'ID de l'activité
+                    });
+                    li.appendChild(removeButton);
+                    favoritesList.appendChild(li);
+                });
+            })
+            .catch(error => console.error('Erreur:', error));
+    }
+
+    function ajouterAuxFavoris(activityId) {
+        fetch('php/ajouter_favori.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                utilisateur_id: userId,
+                activite_id: activityId
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Activité ajoutée aux favoris!');
+                    afficherFavoris();
+                } else {
+                    alert('Erreur lors de l\'ajout aux favoris.');
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
+    }
+
+    function retirerDesFavoris(activityId) {
+        fetch('php/retirer_favori.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                utilisateur_id: userId,
+                activite_id: activityId
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Activité retirée des favoris!');
+                    afficherFavoris();
+                } else {
+                    alert('Erreur lors du retrait des favoris.');
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
     }
 
     function afficherPanier() {
@@ -81,22 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
             li.appendChild(removeButton);
             cartList.appendChild(li);
         });
-    }
-
-    function ajouterAuxFavoris(activity) {
-        let favoris = JSON.parse(localStorage.getItem(`favoris_${userId}`)) || [];
-        if (!favoris.some(fav => fav.nom === activity.nom)) {
-            favoris.push(activity);
-            localStorage.setItem(`favoris_${userId}`, JSON.stringify(favoris));
-            afficherFavoris();
-        }
-    }
-
-    function retirerDesFavoris(activityNom) {
-        let favoris = JSON.parse(localStorage.getItem(`favoris_${userId}`)) || [];
-        favoris = favoris.filter(activity => activity.nom !== activityNom);
-        localStorage.setItem(`favoris_${userId}`, JSON.stringify(favoris));
-        afficherFavoris();
     }
 
     function ajouterAuPanier(activity) {
@@ -163,7 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .catch(error => console.error('Erreur:', error));
     }
-    
 
     function afficherReservationsUtilisateur() {
         fetch(`php/consulter_reservations_utilisateur.php?utilisateur_id=${userId}`)

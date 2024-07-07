@@ -29,4 +29,5 @@ class Database {
 
 require 'admin.php';
 require 'ReservationManager.php';
+require 'FavorisManager.php';
 ?>
